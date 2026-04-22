@@ -41,7 +41,7 @@ public class Episodio implements Comparable<Episodio> {
      * @param dataAlta data de alta do paciente
      */
     public void darAlta(LocalDate dataAlta) {
-        if (dataAlta != null && !dataAlta.isBefore(this.dataAdmissao)) {
+        if (dataAlta != null && dataAlta.isAfter(this.dataAdmissao)) { // <- esta linha
             this.dataAlta = dataAlta;
             this.flagAlta = true;
         }
