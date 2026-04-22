@@ -10,7 +10,7 @@ import java.util.List;
  * Contém um identificador único, um número de camas e uma lista de episódios de internamento.
  * Serve de base para os tipos especializados de enfermaria.
  */
-public abstract class Enfermaria implements IAnalisavel {
+public abstract class Enfermaria implements Analisavel {
 
     /** Identificador único da enfermaria. */
     private String identificador;
@@ -113,9 +113,12 @@ public abstract class Enfermaria implements IAnalisavel {
         return new ArrayList<>(episodios);
     }
 
-    
-    // Retorna uma representação textual da enfermaria com identificador e número de camas.
-    //@return string formatada com os dados da enfermaria
+
+    /**
+     * Retorna uma representação textual da enfermaria com identificador e número de camas.
+     *
+     * @return string formatada com os dados da enfermaria
+     */
     @Override
     public String toString() {
         return String.format("Enfermaria [%s] | Camas: %d | Episodios: %d",
