@@ -1,7 +1,9 @@
 package main;
 
 import io.GestorFicheiros;
-import modelo.*;
+import modelo.Enfermaria;
+import modelo.Episodio;
+import modelo.Hospital;
 import utils.AnalisadorEstatistico;
 
 import java.io.IOException;
@@ -10,146 +12,131 @@ import java.util.List;
 
 /**
  * Classe principal da aplicação de monitorização de ocupação de camas por enfermaria.
- * Cria automaticamente um conjunto de objetos de teste e demonstra todas as funcionalidades.
+ * No arranque, carrega automaticamente os dados dos ficheiros CSV e demonstra
+ * todas as funcionalidades implementadas na Iteração 1.
+ *
+ * @author Grupo
+ * @version 1.0
  */
 public class MainHospital {
 
+    /** Separador visual para organização da saída no terminal. */
+    private static final String SEPARADOR = "=".repeat(60);
+
+    /** Data de referência utilizada nos cálculos de ocupação. */
+    private static final LocalDate DATA_REFERENCIA = LocalDate.of(2024, 3, 10);
+
+    /** Data de início do intervalo de análise de pressão. */
+    private static final LocalDate DATA_INICIO = LocalDate.of(2024, 3, 8);
+
+    /** Data de fim do intervalo de análise de pressão. */
+    private static final LocalDate DATA_FIM = LocalDate.of(2024, 3, 12);
+
+    /** Identificador da enfermaria usada nas listagens de episódios. */
+    private static final String ID_ENFERMARIA_EXEMPLO = "G1";
+
     /**
      * Ponto de entrada da aplicação.
+     * Carrega os dados dos ficheiros CSV e executa a demonstração de todas as funcionalidades.
      *
-     * @param args argumentos da linha de comandos (não utilizados)
-     * @throws IOException se ocorrer erro na leitura de ficheiros
+     * @param args argumentos da linha de comando (não utilizados)
+     * @throws IOException se ocorrer erro ao escrever no ficheiro de log de validação
      */
     public static void main(String[] args) throws IOException {
 
+        System.out.println(SEPARADOR);
+        System.out.println("  Hospital XYZ - Sistema de Monitorizacao de Camas");
+        System.out.println(SEPARADOR);
+
         // -------------------------------------------------------
-        // 1. CRIAR HOSPITAL
+        // RF1 - CARREGAR DADOS A PARTIR DE FICHEIROS CSV
         // -------------------------------------------------------
         Hospital hospital = new Hospital("Hospital Central XYZ");
-        System.out.println("=== " + hospital + " ===\n");
 
-        // -------------------------------------------------------
-        // 2. CRIAR ENFERMARIAS MANUALMENTE
-        // -------------------------------------------------------
-        EnfermariaGeral egeral = new EnfermariaGeral("G1", 4, 2, "09h-20h");
-        egeral.adicionarRecurso("Ventilador");
-        egeral.adicionarRecurso("Monitor Cardiaco");
+        System.out.println("\nRF1: A carregar enfermarias do ficheiro CSV...");
+        GestorFicheiros.carregarEnfermarias("enfermarias.csv", hospital);
+        System.out.println("     Enfermarias carregadas: " + hospital.getEnfermarias().size());
 
-        EnfermariaPsiquiatrica epsi = new EnfermariaPsiquiatrica("P1", 4, "14h-17h", "ALTO");
+        System.out.println("RF1: A carregar episodios do ficheiro CSV...");
+        GestorFicheiros.carregarEpisodios("episodios.csv", hospital);
+        System.out.println("     Consulte 'erros_validacao.log' para entradas rejeitadas.");
 
-        EnfermariaCuidadosIntensivos euci = new EnfermariaCuidadosIntensivos("I1", 4, "10h-12h", 101.3, 101.0);
-
-        hospital.adicionarEnfermaria(egeral);
-        hospital.adicionarEnfermaria(epsi);
-        hospital.adicionarEnfermaria(euci);
-
-        // -------------------------------------------------------
-        // 3. CRIAR EPISÓDIOS MANUALMENTE
-        // -------------------------------------------------------
-
-        // Enfermaria Geral - 4 camas, admissões sobrepostas para forçar pressão
-        Episodio ep1 = new Episodio("C1", LocalDate.of(2024, 3, 1));
-        ep1.darAlta(LocalDate.of(2024, 3, 10));
-
-        Episodio ep2 = new Episodio("C2", LocalDate.of(2024, 3, 3));
-        ep2.darAlta(LocalDate.of(2024, 3, 15));
-
-        Episodio ep3 = new Episodio("C3", LocalDate.of(2024, 3, 3));
-        ep3.darAlta(LocalDate.of(2024, 3, 20));
-
-        Episodio ep4 = new Episodio("C4", LocalDate.of(2024, 3, 3));
-        ep4.darAlta(LocalDate.of(2024, 3, 18));
-
-        egeral.adicionarEpisodio(ep1);
-        egeral.adicionarEpisodio(ep2);
-        egeral.adicionarEpisodio(ep3);
-        egeral.adicionarEpisodio(ep4);
-
-        // Enfermaria Psiquiátrica
-        Episodio ep5 = new Episodio("C1", LocalDate.of(2024, 3, 1));
-        ep5.darAlta(LocalDate.of(2024, 3, 8));
-
-        Episodio ep6 = new Episodio("C2", LocalDate.of(2024, 3, 5));
-
-        epsi.adicionarEpisodio(ep5);
-        epsi.adicionarEpisodio(ep6);
-
-        // Enfermaria UCI
-        Episodio ep7 = new Episodio("C1", LocalDate.of(2024, 3, 2));
-        ep7.darAlta(LocalDate.of(2024, 3, 12));
-
-        Episodio ep8 = new Episodio("C2", LocalDate.of(2024, 3, 2));
-        ep8.darAlta(LocalDate.of(2024, 3, 7));
-
-        Episodio ep9 = new Episodio("C3", LocalDate.of(2024, 3, 2));
-        Episodio ep10 = new Episodio("C4", LocalDate.of(2024, 3, 2));
-
-        euci.adicionarEpisodio(ep7);
-        euci.adicionarEpisodio(ep8);
-        euci.adicionarEpisodio(ep9);
-        euci.adicionarEpisodio(ep10);
-
-        // -------------------------------------------------------
-        // 4. RF1 - CARREGAR A PARTIR DE FICHEIROS CSV
-        // -------------------------------------------------------
-        System.out.println("=== RF1: Leitura de Ficheiros CSV ===");
-        Hospital hospitalCSV = new Hospital("Hospital CSV");
-        GestorFicheiros.carregarEnfermarias("enfermarias.csv", hospitalCSV);
-        GestorFicheiros.carregarEpisodios("episodios.csv", hospitalCSV);
-        System.out.println("Enfermarias carregadas: " + hospitalCSV.getEnfermarias().size());
-        for (Enfermaria enf : hospitalCSV.getEnfermarias()) {
+        System.out.println("\n" + SEPARADOR);
+        System.out.println("  Estrutura carregada");
+        System.out.println(SEPARADOR);
+        System.out.println(hospital);
+        for (Enfermaria enf : hospital.getEnfermarias()) {
             System.out.println("  " + enf);
         }
-        System.out.println();
 
         // -------------------------------------------------------
-        // 5. RF2 - INDICADORES DE OCUPAÇÃO
+        // RF2 - INDICADORES DE OCUPAÇÃO
         // -------------------------------------------------------
-        System.out.println("=== RF2: Indicadores de Ocupacao ===");
-        LocalDate dataRef = LocalDate.of(2024, 3, 5);
+        System.out.println("\n" + SEPARADOR);
+        System.out.printf("  RF2: Indicadores de Ocupacao em %s%n", DATA_REFERENCIA);
+        System.out.println(SEPARADOR);
 
         for (Enfermaria enf : hospital.getEnfermarias()) {
-            System.out.println("\n" + enf.getIdentificador() + " em " + dataRef + ":");
-            System.out.println("  Ocupacao absoluta : " + enf.getOcupacaoAbsoluta(dataRef) + " camas");
-            System.out.printf ("  Taxa de ocupacao  : %.1f%%%n", enf.getTaxaOcupacao(dataRef));
-            System.out.println("  Em pressao        : " + (enf.emPressao(dataRef) ? "Sim" : "Nao"));
+            System.out.printf("%n  Enfermaria : %s%n", enf.getIdentificador());
+            System.out.printf("  Ocupacao   : %d / %d camas%n",
+                    enf.getOcupacaoAbsoluta(DATA_REFERENCIA), enf.getNumeroCamas());
+            System.out.printf("  Taxa       : %.1f%%%n",
+                    enf.getTaxaOcupacao(DATA_REFERENCIA));
+            System.out.printf("  Estado     : %s%n",
+                    enf.emPressao(DATA_REFERENCIA) ? "Em pressao" : "Estado normal");
         }
-        System.out.println();
 
-        // LoS da enfermaria geral
-        System.out.println("=== RF2: Sumario LoS - Enfermaria " + egeral.getIdentificador() + " ===");
-        AnalisadorEstatistico.SumarioLoS sumario = AnalisadorEstatistico.calcularEstatisticasLoS(egeral);
-        System.out.println("  " + sumario);
-        System.out.println();
-
-        // -------------------------------------------------------
-        // 6. RF3 - ANÁLISE DE PRESSÃO POR INTERVALO DE DATAS
-        // -------------------------------------------------------
-        System.out.println("=== RF3: Analise de Pressao por Intervalo ===");
-        LocalDate inicio = LocalDate.of(2024, 3, 1);
-        LocalDate fim = LocalDate.of(2024, 3, 10);
+        System.out.println("\n" + SEPARADOR);
+        System.out.println("RF2: Sumario de Length of Stay (LoS) por Enfermaria");
+        System.out.println(SEPARADOR);
 
         for (Enfermaria enf : hospital.getEnfermarias()) {
-            System.out.println("\nEnfermaria " + enf.getIdentificador() + " (" + inicio + " a " + fim + "):");
-            AnalisadorEstatistico.analisarPressaoPorIntervalo(enf, inicio, fim);
+            AnalisadorEstatistico.SumarioLoS sumario = AnalisadorEstatistico.calcularEstatisticasLoS(enf);
+            System.out.printf("  %s: %s%n", enf.getIdentificador(), sumario);
         }
-        System.out.println();
 
         // -------------------------------------------------------
-        // 7. RF4 - LISTAGENS ORDENADAS
+        // RF3 - ANÁLISE DE PRESSÃO POR INTERVALO DE DATAS
         // -------------------------------------------------------
-        System.out.println("=== RF4: Episodios Ordenados por Admissao - Enfermaria " + egeral.getIdentificador() + " ===");
-        List<Episodio> ordenados = egeral.getEpisodiosOrdenadosPorAdmissao();
-        for (Episodio ep : ordenados) {
-            System.out.println("  " + ep);
-        }
-        System.out.println();
+        System.out.println("\n" + SEPARADOR);
+        System.out.printf("Analise de Pressao [%s a %s]%n", DATA_INICIO, DATA_FIM);
+        System.out.println(SEPARADOR);
 
-        System.out.println("=== RF4: Enfermarias Ordenadas por Taxa de Ocupacao em " + dataRef + " ===");
-        List<Enfermaria> listaOrdenada = hospital.getEnfermarias();
-        AnalisadorEstatistico.ordenarPorTaxaOcupacao(listaOrdenada, dataRef);
-        for (Enfermaria enf : listaOrdenada) {
-            System.out.printf("  %s | Taxa: %.1f%%%n", enf.getIdentificador(), enf.getTaxaOcupacao(dataRef));
+        for (Enfermaria enf : hospital.getEnfermarias()) {
+            System.out.printf("%nEnfermaria %s:%n", enf.getIdentificador());
+            AnalisadorEstatistico.analisarPressaoPorIntervalo(enf, DATA_INICIO, DATA_FIM);
         }
+
+        // -------------------------------------------------------
+        // RF4 - LISTAGENS ORDENADAS
+        // -------------------------------------------------------
+        System.out.println("\n" + SEPARADOR);
+        System.out.printf("Episodios da Enfermaria %s (por data de admissao)%n", ID_ENFERMARIA_EXEMPLO);
+        System.out.println(SEPARADOR);
+
+        Enfermaria enfermariaExemplo = hospital.obterEnfermaria(ID_ENFERMARIA_EXEMPLO);
+        if (enfermariaExemplo != null) {
+            List<Episodio> episodiosOrdenados = enfermariaExemplo.getEpisodiosOrdenadosPorAdmissao();
+            for (Episodio ep : episodiosOrdenados) {
+                System.out.println("  " + ep);
+            }
+        }
+
+        System.out.println("\n" + SEPARADOR);
+        System.out.printf("  RF4: Enfermarias por Taxa de Ocupacao em %s (decrescente)%n", DATA_REFERENCIA);
+        System.out.println(SEPARADOR);
+
+        List<Enfermaria> enfermariasOrdenadas = hospital.getEnfermarias();
+        AnalisadorEstatistico.ordenarPorTaxaOcupacao(enfermariasOrdenadas, DATA_REFERENCIA);
+        for (Enfermaria enf : enfermariasOrdenadas) {
+            System.out.printf("  %-6s | Taxa: %5.1f%% | %s%n",
+                    enf.getIdentificador(),
+                    enf.getTaxaOcupacao(DATA_REFERENCIA),
+                    enf.emPressao(DATA_REFERENCIA) ? "Em pressao" : "Estado normal");
+        }
+
+        System.out.println("\n" + SEPARADOR);
+        System.out.println("  Fim da execucao.");
+        System.out.println(SEPARADOR);
     }
 }
