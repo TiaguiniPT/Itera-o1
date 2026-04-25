@@ -3,33 +3,31 @@ package modelo;
 import java.time.LocalDate;
 
 /**
- * Interface que define os métodos de análise de ocupação de uma enfermaria.
- * Implementada por todas as classes de enfermaria do sistema.
+ * Define indicadores de ocupação por data.
  */
 public interface Analisavel {
 
     /**
-     * Calcula o número absoluto de camas ocupadas numa data de referência.
+     * Devolve o número de camas ocupadas numa data.
      *
-     * @param data data de referência para o cálculo
-     * @return número de episódios ativos na data indicada
+     * @param data data a analisar
+     * @return número de camas ocupadas
      */
     int getOcupacaoAbsoluta(LocalDate data);
 
     /**
-     * Calcula a taxa de ocupação percentual numa data de referência.
+     * Calcula a taxa de ocupação numa data.
      *
-     * @param data data de referência para o cálculo
-     * @return taxa de ocupação em percentagem (0.0 a 100.0)
+     * @param data data a analisar
+     * @return taxa de ocupação em percentagem
      */
     double getTaxaOcupacao(LocalDate data);
 
     /**
-     * Determina se a enfermaria está em situação de pressão numa data de referência.
-     * Considera pressão quando a taxa de ocupação supera os 85%.
+     * Indica se a enfermaria está em pressão numa data.
      *
-     * @param data data de referência para a verificação
-     * @return {@code true} se a taxa de ocupação for superior a 85%, {@code false} caso contrário
+     * @param data data a analisar
+     * @return {@code true} se a taxa for superior a 85%
      */
     boolean emPressao(LocalDate data);
 }
