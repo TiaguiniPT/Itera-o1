@@ -5,9 +5,14 @@ import java.time.temporal.ChronoUnit;
 
 /**
  * Representa um episódio de internamento de um paciente numa cama específica.
- * Contém informação sobre a cama, datas de admissão e alta, e o estado do episódio.
  */
 public class Episodio implements Comparable<Episodio> {
+
+    /** Contador para gerar identificadores simples. */
+    private static int proximoNumero = 1;
+
+    /** Identificador do episódio. */
+    private String episodioId; 
 
     /** Identificador único da cama associada ao episódio. */
     private String identificadorCama;
@@ -22,36 +27,57 @@ public class Episodio implements Comparable<Episodio> {
     private boolean flagAlta;
 
     /**
-     * Cria um novo episódio de internamento.
+     * Cria um episódio ativo com identificador gerado automaticamente.
      *
-     * @param identificadorCama identificador único da cama
-     * @param dataAdmissao      data de admissão do paciente
+     * @param identificadorCama identificador da cama
+     * @param dataAdmissao data de admissão
      */
     public Episodio(String identificadorCama, LocalDate dataAdmissao) {
-        this.identificadorCama = identificadorCama;
-        this.dataAdmissao = dataAdmissao;
-        this.dataAlta = null;
-        this.flagAlta = false;
+        this("EP" + proximoNumero++, identificadorCama, dataAdmissao, null, false);
     }
 
     /**
-     * Regista a alta do paciente, definindo a data de alta e ativando a flag de alta.
-     * A operação só é executada se a data de alta for igual ou posterior à data de admissão.
+     * Cria um episódio com todos os dados definidos.
      *
-     * @param dataAlta data de alta do paciente
+     * @param episodioId identificador do episódio
+     * @param identificadorCama identificador da cama
+     * @param dataAdmissao data de admissão
+     * @param dataAlta data de alta
+     * @param flagAlta indica se tem alta
+     */
+    public Episodio(String episodioId, String identificadorCama, LocalDate dataAdmissao, LocalDate dataAlta, boolean flagAlta) {
+        this.episodioId = episodioId;
+        this.identificadorCama = identificadorCama;
+        this.dataAdmissao = dataAdmissao;
+        this.dataAlta = dataAlta;
+        this.flagAlta = flagAlta;
+    }
+
+    /**
+     * Devolve o identificador do episódio.
+     *
+     * @return identificador do episódio
+     */
+    public String getEpisodioId() {
+        return episodioId;
+    }
+    
+    /**
+     * Regista a alta do paciente.
+     *
+     * @param dataAlta data de alta
      */
     public void darAlta(LocalDate dataAlta) {
-        if (dataAlta != null && dataAlta.isAfter(this.dataAdmissao)) { // <- esta linha
+        if (dataAlta != null && dataAlta.isAfter(this.dataAdmissao)) {
             this.dataAlta = dataAlta;
             this.flagAlta = true;
         }
     }
-
+    
     /**
-     * Calcula o Length of Stay (LoS) em dias.
-     * Retorna 0 se o paciente ainda não tiver alta.
+     * Calcula o Length of Stay em dias.
      *
-     * @return número de dias de internamento, ou 0 se sem alta
+     * @return número de dias, ou 0 se sem alta
      */
     public long getLoS() {
         if (!flagAlta) return 0;
@@ -88,7 +114,7 @@ public class Episodio implements Comparable<Episodio> {
     /**
      * Indica se o paciente já teve alta.
      *
-     * @return {@code true} se o paciente já teve alta, {@code false} caso contrário
+     * @return {@code true} se o paciente já teve alta
      */
     public boolean isFlagAlta() {
         return flagAlta;
